@@ -1,0 +1,10 @@
+export("cfc.tbasis")
+export("cfc.pbasis")
+
+S3method("summary", "cfc.tbasis")
+S3method("summary", "cfc.pbasis")
+S3method("plot", "summary.cfc.tbasis")
+S3method("plot", "summary.cfc.pbasis")
+
+importFrom(abind, abind)
+

@@ -1,0 +1,10 @@
+e836db81b6afaab838ad1b1a64510a15 *DESCRIPTION
+85ea0442909293c95c60769396216306 *NAMESPACE
+8dd052efc7755f6de181050c4c4464aa *R/cfc.R
+8e653927772874b2ece93e6d9d1b703d *R/zzz.R
+4287db3533e463a0c4899b7faad8962b *data/bmt.txt.gz
+3a953a6a93d4ee9949084464ab794c23 *man/bmt.Rd
+44c2fce5156c3b716aeb4cd07f227707 *man/cfc.pbasis.Rd
+d24f11e272b2646d7d721cf8c7f5e90f *man/cfc.tbasis.Rd
+d32b39199db539a2dc12b498cd238d30 *man/summary.cfc.pbasis.Rd
+26af83d26ba2cf23934c7bdeac12168c *man/summary.cfc.tbasis.Rd
