@@ -1,10 +1,27 @@
+# legacy CFC
 export("cfc.tbasis")
 export("cfc.pbasis")
-
 S3method("summary", "cfc.tbasis")
 S3method("summary", "cfc.pbasis")
 S3method("plot", "summary.cfc.tbasis")
 S3method("plot", "summary.cfc.pbasis")
+importFrom("abind", "abind")
 
-importFrom(abind, abind)
+# addition for 1.0
+useDynLib(CFC)
+#exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+export("cfc")
+export("cfc.survreg")
+S3method("summary", "cfc.survreg")
+S3method("plot", "summary.cfc.survreg")
+export("cfc.prepdata")
+importFrom("survival", "survreg", "Surv", "survreg.control", "survreg.distributions")
+export("cfc.survreg.survprob")
 
+importFrom("graphics", "legend", "lines", "plot")
+importFrom("stats", "approx", "as.formula", "model.frame", "model.matrix", "quantile")
+
+# parallelization
+importFrom("foreach", "foreach", "%dopar%")
+importFrom("doParallel", "registerDoParallel", "stopImplicitCluster")

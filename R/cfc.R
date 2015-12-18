@@ -1,235 +1,200 @@
-#### SPLIT UP THE CODE FOR TIME BASIS AND QUANTILE BASIS: IT REDUCES CONFUSION AND IT ALSO CREATES MORE FUNCTIONS AND "FELESH"!!
+# standard single-interval Simpson rule for numerical integration
+# implemented as a reference
+simpson.standard <- function(f, a, b, arg) {
+  c <- (a + b) / 2.0
+  h3 <- (b - a) / 6.0
+  return (h3*(f(a, arg) + 4.0*f(c, arg) + f(b, arg)))
+}
 
-cfc.tbasis <- function(p1, p2, unity.tol = 1e-6,
-  diff.tol = 1e-2, diff.tol.policy = c("mean","all"),
-  check = TRUE) {
-  # checks for p1,p2: 1) same dimensions, 2) between 0.0 and 1.0, 3) non-increasing with time, 4) start at 1.0, 5) check for large steps
+# numerical integration "\int_a^b f(t, ...) dg(t, ...)" over a single interval, using generalized Simpson's rule
+simpson.generalized <- function(f, g = function(x, ...) x, a, b, ...) { # can be abbreviated if f,g are assumed to be vectorized
+  m <- (a + b) / 2
+  ga <- g(a, ...)
+  gm <- g(m, ...)
+  gb <- g(b, ...)
+  fa <- f(a, ...)
+  fm <- f(m, ...)
+  fb <- f(b, ...)
   
-  diff.tol.policy <- match.arg(diff.tol.policy)
+  h <- gb - ga
+  d <- 2 * gm - (ga + gb)
+  r <- d / h
   
-  if (is.null(dim(p1))) {
-    nt <- length(p1)
-    if (length(p2) != nt) stop("p1 and p2 have unequal lengths")
-    nother <- 1
-    dim.p1 <- c(nt, 1)
-  } else {
-    dim.p1 <- dim(p1)
-    if (!identical(dim.p1, dim(p2))) stop("p1 and p2 dimensions do not match")
-    nt <- dim.p1[1]
-    nother <- prod(dim.p1)/nt
-  }
-  if (check) if (any(p1<0.0 | p1>1.0 | p2<0.0 | p2>1.0)) stop("out-of-range probabilities")
-
-  p1.2d <- array(p1, dim = c(nt, nother))
-  p2.2d <- array(p2, dim = c(nt, nother))
-  if (check) if (any(abs(p1.2d[1,] - 1.0) > unity.tol)) stop("p1 probabilities must start at 1.0")
-  if (check) if (any(abs(p2.2d[1,] - 1.0) > unity.tol)) stop("p2 probabilities must start at 1.0")
-
-
-  seq.left <- 1:(nt-1)
-  seq.right <- seq.left+1
-  
-  dp1 <- apply(p1.2d, 2, diff)
-  if (check) {
-    if (any(dp1>0.0)) stop("increasing probabilities with time detected for p1")
-    if (diff.tol.policy == "mean") {
-      if (mean(dp1) < -1.0*diff.tol) stop("average change in p1 exceeds threshold")
-    } else if (diff.tol.policy == "all") {
-      if (any(dp1 < -1.0*diff.tol)) stop("one or more changes in p1 exceed threshold")
-    }
-  }
-  dci1 <- -0.5 * (p2.2d[seq.left,] + p2.2d[seq.right,]) * dp1
-  ci1 <- rbind(0, apply(dci1, 2, cumsum))
-  ci1 <- array(ci1, dim = dim.p1)
-  
-  dp2 <- apply(p2.2d, 2, diff)
-  if (check) {
-    if (any(dp2>0.0)) stop("increasing probabilities with time detected for p2")
-    if (diff.tol.policy == "mean") {
-      if (mean(dp2) < -1.0*diff.tol) stop("average change in p2 exceeds threshold")
-    } else if (diff.tol.policy == "all") {
-      if (any(dp2 < -1.0*diff.tol)) stop("one or more changes in p2 exceed threshold")
-    }
-  }
-  dci2 <- -0.5 * (p1.2d[seq.left,] + p1.2d[seq.right,]) * dp2
-  ci2 <- rbind(0, apply(dci2, 2, cumsum))
-  ci2 <- array(ci2, dim = dim.p1)
-
-  if (is.null(dim(p1))) {
-    ci1 <- drop(ci1)
-    ci2 <- drop(ci2)
-  }
-  
-  if (is.null(dim(p1))) {
-    ret <- cbind(ci1, ci2, p1*p2)
-    colnames(ret) <- c("ci1", "ci2", "efp")
-  } else {
-    ret <- list(ci1 = ci1, ci2 = ci2, efp = p1*p2)
-  }
-  class(ret) <- c("cfc.tbasis", class(ret))
+  ret <- (h / 6) * ((fa + 4 * fm + fb) + 2 * r * (fa - fb) - 3 * r^2 * (fa + fb)) / (1 - r^2)
   return (ret)
 }
 
-summary.cfc.tbasis <- function(object,
-  MARGIN = if (class(object)[2] == "matrix") NULL else 1, ...) {
-  if (class(object)[2] == "matrix") {
-    class(object)[1] <- "summary.cfc.tbasis"
-    attr(object, "popavg") <- FALSE
-    return (object)
-  }
-  MARGIN <- as.integer(MARGIN)
-  if (!(1 %in% MARGIN)) stop("time dimension cannot be aggregated")
-  if (identical(MARGIN, 1:length(dim(object$ci1)))) stop("cannot keep all dimensions during aggregation")
-  #cat("MARGIN:", MARGIN, "\n")
-  ci1 <- apply(object$ci1, MARGIN = MARGIN, mean)
-  ci2 <- apply(object$ci2, MARGIN = MARGIN, mean)
-  efp <- apply(object$efp, MARGIN = MARGIN, mean)
-  if (is.null(dim(ci1))) {
-    ret <- cbind(ci1, ci2, efp)
-    colnames(ret) <- c("ci1", "ci2", "efp")
-  } else {
-    ret <- list(ci1 = ci1, ci2 = ci2, efp = efp)
-  }
-  class(ret) <- c("summary.cfc.tbasis", class(ret))
-  return (invisible(ret))
+summary.cfc <- function(object, quantiles = c(0.025, 0.5, 0.975)
+  , dims = c(dim(object$val)[3]), dims.keep = 1) {
+  dat.dims <- dim(object$val)
+  dat.reshaped <- array(object$val, dim = c(dat.dims[1:2], dims))
+  dat.quant <- apply(X = dat.reshaped, MARGIN = c(1, 2, dims.keep + 2), FUN = quantile, probs = quantiles)
+  return (dat.quant)
 }
 
-plot.summary.cfc.tbasis <- function(x, t = 1, ci = 0.95, ...) {
-  if (class(x)[2] == "matrix") {
-    nt <- dim(x)[1]
-    if (length(t) == 1) t <- (0:(nt-1))*t
-    else if (length(t) != nt) stop("bad length for t vector")
-    plot(t, x[,"efp"], type = "l", ylim = c(0.0,1.0)
-         , xlab = "Time", ylab = "Probability", col = "black")
-    lines(t, x[,"ci1"], col = "red")
-    lines(t, x[,"ci2"], col = "green")
-    legend("topright", legend = c("Event-Free", "CI - Cause 1", "CI - Cause 2")
-           , col = c("black", "red", "green"), lty = rep(1,3))
-  } else {
-    dims <- dim(x$ci1)
-    nt <- dims[1]
-    if (length(t) == 1) t <- (0:(nt-1))*t
-    else if (length(t) != nt) stop("bad length for t vector")
-    nother <- prod(dims)/nt
-    ci1.2d <- array(x$ci1, dim = c(nt, nother))
-    ci2.2d <- array(x$ci2, dim = c(nt, nother))
-    efp.2d <- array(x$efp, dim = c(nt, nother))
-    qvec <- c(0.5*(1-ci), 0.5, 0.5*(1+ci))
-    efp.q <- t(apply(efp.2d, 1, quantile, probs = qvec))
-    ci1.q <- t(apply(ci1.2d, 1, quantile, probs = qvec))
-    ci2.q <- t(apply(ci2.2d, 1, quantile, probs = qvec))
-    plot(t, efp.q[,2], type = "l", ylim = c(0.0, 1.0)
-         , xlab = "Time", ylab = "Population Average", col = "black")
-    lines(t, efp.q[,1], col = "black", lty = 2)
-    lines(t, efp.q[,3], col = "black", lty = 2)
-    lines(t, ci1.q[,2], col = "red")
-    lines(t, ci1.q[,1], col = "red", lty = 2)
-    lines(t, ci1.q[,3], col = "red", lty = 2)
-    lines(t, ci2.q[,2], col = "green")
-    lines(t, ci2.q[,1], col = "green", lty = 2)
-    lines(t, ci2.q[,3], col = "green", lty = 2)
-    legend("topright", legend = c("Event-Free", "CI - Cause 1", "CI - Cause 2")
-           , col = c("black", "red", "green"), lty = rep(1,3))
-    return (invisible(list(efp = efp.q, ci1 = ci1.q, ci2 = ci2.q)))
+print.summary.cfc <- function(x, ...) {}
+
+plot.summary.cfc <- function(x, ...) {}
+
+cfc <- function(f.list, args.list, n, tout, Nmax = 100L, rel.tol = 1e-5, ncores = 1) {
+  if (!is.list(f.list)) stop("f.list must be a list")
+  K <- length(f.list) # number of causes
+  if (K != length(args.list)) stop("length of args.list must match that of f.list")
+  if (is.function(f.list[[1]])) { # R path
+    ret <- cscr.samples.R(f.list, args.list, tout, Nmax, rel.tol, n, ncores)
+  } else { # Cpp path
+    func_list <- list()
+    init_list <- list()
+    free_list <- list()
+    for (k in 1:K) {
+      func_list[[k]] <- f.list[[k]][[1]]
+      init_list[[k]] <- f.list[[k]][[2]]
+      free_list[[k]] <- f.list[[k]][[3]]
+    }
+    ret <- cscr_samples_Cpp(func_list, init_list, free_list, args.list, tout, Nmax, rel.tol, n, ncores)
+    ret$is.maxiter <- as.vector(ret$is.maxiter) # TODO: find better way to covert to vector (from matrix) inside Cpp code
   }
-}
-
-cfc.pbasis <- function(t1, t2, probs, unity.tol = 1e-6,
-  diff.tol = 1e-2, diff.tol.policy = c("all", "mean")) {
-  # TODO: consider allowing unsorted vectors; sort and then check for validity
-  diff.tol.policy <- match.arg(diff.tol.policy)
-
-  if (abs(probs[1] - 1.0) > unity.tol) stop("probability vector must start at 1.0")
-  if (any(diff(probs) >= 0.0)) stop("probabilities must be decreasing with time")
-  if (diff.tol.policy == "all") {
-    if (any(diff(probs) < -1.0*diff.tol)) stop("one or more changes in probs exceed threshold")
-  } else if (diff.tol.policy == "mean") {
-    if (mean(diff(probs)) < -1.0*diff.tol) stop("average change in probs exceeds threshold")
-  }
-
-  if (is.null(dim(t1))) {
-    nt <- length(t1)
-    if (!is.null(dim(t2)) || length(t2) != nt) stop("t1 and t2 dimensions do not match")
-    nother <- 1
-    dim.t1 <- c(nt, 1)
-  } else {
-    dim.t1 <- dim(t1)
-    if (!identical(dim.t1, dim(t2))) stop("t1 and t2 dimensions do not match")
-    nt <- dim.t1[1]
-    nother <- prod(dim.t1)/nt
-  }
-  t1.2d <- array(t1, dim = c(nt, nother))
-  t2.2d <- array(t2, dim = c(nt, nother))
-  dt1 <- apply(t1.2d, 2, diff)
-  dt2 <- apply(t2.2d, 2, diff)
-
-  if (any(dt1 <= 0.0)) stop("non-increasing times detected in t1")
-  if (any(dt2 <= 0.0)) stop("non-increasing times detected in t2")
-
-  ret <- lapply(1:nother, function(n) {
-    ta <- t1.2d[,n]
-    tb <- t2.2d[,n]
-    tmax <- min(max(ta), max(tb))
-    tcomb <- sort(unique(c(ta, tb)))
-    tcomb <- tcomb[which(tcomb <= tmax)]
-    pa <- approx(ta, probs, tcomb)$y
-    pb <- approx(tb, probs, tcomb)$y
-    rettmp <- cbind(tcomb, cfc.tbasis(pa, pb, check = FALSE))
-    colnames(rettmp) <- c("time", "ci1", "ci2", "efp")
-    return (rettmp)
-  })
-  if (nother == 1) ret <- ret[[1]]
-  class(ret) <- c("cfc.pbasis", class(ret))
+  class(ret) <- c("cfc", class(ret))
   return (ret)
 }
 
-summary.cfc.pbasis <- function(object, ...) {
-  if (class(object)[2] == "matrix") {
-    class(object)[1] <- "summary.cfc.pbasis"
-    attr(object, "popavg") <- FALSE
-    return (object)
+cscr.samples.R <- function(f.list, args.list, tout, Nmax = 100L, rel.tol = 1e-6, nsmp, ncores = 1) {
+  trapezoidal.step <- function(fvec, gvec) {
+    h <- gvec[3] - gvec[1]
+    ret <- (h / 2) * (fvec[1] + fvec[3])
+    return (ret)
   }
-  tmax <- min(sapply(object, function(x) max(x[,"time"])))
-  tvec <- unique(sort(unlist(sapply(object, function(x) x[,"time"]))))
-  tvec <- tvec[tvec < tmax]
-  ci1 <- rowMeans(sapply(object, function(x) {
-    approx(x[,"time"], x[,"ci1"], tvec)$y
-  }))
-  ci2 <- rowMeans(sapply(object, function(x) {
-    approx(x[,"time"], x[,"ci2"], tvec)$y
-  }))
-  efp <- 1 - (ci1 + ci2)
+  simpson.step <- function(fvec, gvec) {
+    gdiff <- diff(gvec)
+    #h <- gvec[3] - gvec[1]
+    #if (abs(h) < .Machine$double.eps) return (0.0)
+    if (abs(gdiff[1]) < .Machine$double.eps) {
+      return (trapezoidal.step(c(fvec[2], NA, fvec[3]), c(gvec[2], NA, gvec[3])))
+    } else if (abs(gdiff[2]) < .Machine$double.eps) {
+      return (trapezoidal.step(c(fvec[1], NA, fvec[2]), c(gvec[1], NA, gvec[2])))
+    }
+    #r <- (2* gvec[2] - gvec[1] - gvec[3]) / h
+    h <- gdiff[1] + gdiff[2]
+    r <- (gdiff[1] - gdiff[2]) / h
+    ret <- (h / 6) * ((fvec[1] + 4 * fvec[2] + fvec[3]) + 2 * r * (fvec[1] - fvec[3]) - 3 * r^2 * (fvec[1] + fvec[3])) / (1 - r^2)
+    return (ret)
+  }
   
-  ret <- cbind(tvec, ci1, ci2, efp)
-  colnames(ret) <- c("time", "ci1", "ci2", "efp")
-  attr(ret, "popavg") <- TRUE
-  class(ret) <- c("summary.cfc.pbasis", class(ret))
+  tmax <- max(tout)
+  nout <- length(tout)
+  K <- length(f.list)
+  I_out_value <- array(NA, dim = c(nout, K, nsmp))
+  scube <- array(NA, dim = c(nout, K, nsmp)) # unadjusted survival probabilities
+  smat <- array(NA, dim = c(nout, K))
   
-  return (invisible(ret))
+  is.maxiter <- rep(F, nsmp)
+  registerDoParallel(ncores)
+  retsink <- foreach(j=1:nsmp) %dopar% {
+  #for (j in 1:nsmp) {
+    N <- 1
+    
+    xvec.new <- c(0.0, tmax/2, tmax)
+    fmat.new <- array(NA, dim = c(3, K))
+    for (k in 1:K) fmat.new[, k] <- f.list[[k]](xvec.new, args.list[[k]], j)
+    fprodmat.new <- t(apply(fmat.new, 1, function(x) prod(x)/x)) # TODO: handle division by zero
+    
+    I.trap.int.new <- -sapply(1:K, function(k) {
+      trapezoidal.step(fprodmat.new[, k], fmat.new[, k])
+    })
+    
+    I.simp.int.new <- -sapply(1:K, function(k) {
+      simpson.step(fprodmat.new[, k], fmat.new[, k])
+    })
+    
+    xvec <- xvec.new
+    f.mat <- fmat.new
+    fprod.mat <- fprodmat.new
+    I.trap.int <- matrix(I.trap.int.new, ncol = K)
+    I.simp.int <- matrix(I.simp.int.new, ncol = K)
+    
+    I.trap.cum <- rbind(0, I.trap.int)
+    I.simp.cum <- rbind(0, I.simp.int)
+    
+    err.abs.int <- abs(I.simp.int - I.trap.int)
+    err.abs.cum <- abs(I.simp.cum - I.trap.cum)
+    err.rel.cum <- err.abs.cum / abs(I.simp.cum)
+    err.abs <- err.abs.cum[N + 1, ]
+    err.rel <- err.rel.cum[N + 1, ]
+    err.rel.max <- max(err.rel)
+    
+    while(max(err.rel) > rel.tol && N < Nmax) { # add Nmin
+      idx <- which.max(apply(err.abs.int, 1, max))
+      
+      xvec.new <- c(mean(xvec[(2*idx - 1):(2*idx)]), xvec[2*idx], mean(xvec[(2*idx):(2*idx + 1)]))
+      xvec <- c(xvec[1:(2*idx - 1)], xvec.new, xvec[(2*idx + 1):(2*N + 1)])
+      
+      for (k in 1:K) {
+        fmat.new[, k] <- f.list[[k]](xvec.new, args.list[[k]], j)
+      }
+      fprodmat.new <- t(apply(fmat.new, 1, function(x) prod(x)/x)) # TODO: handle division by zero
+      
+      f.mat <- rbind(f.mat[1:(2*idx - 1), ], fmat.new, f.mat[(2*idx + 1):(2*N + 1), ])
+      fprod.mat <- rbind(fprod.mat[1:(2*idx - 1), ], fprodmat.new, fprod.mat[(2*idx + 1):(2*N + 1), ])
+      
+      I.trap.int.1 <- -sapply(1:K, function(k) {
+        trapezoidal.step(fprod.mat[2*idx + (-1:1), k], f.mat[2*idx + (-1:1), k])
+      })
+      I.trap.int.2 <- -sapply(1:K, function(k) {
+        trapezoidal.step(fprod.mat[2*idx + (1:3), k], f.mat[2*idx + (1:3), k])
+      })
+      I.simp.int.1 <- -sapply(1:K, function(k) {
+        simpson.step(fprod.mat[2*idx + (-1:1), k], f.mat[2*idx + (-1:1), k])
+      })
+      I.simp.int.2 <- -sapply(1:K, function(k) {
+        simpson.step(fprod.mat[2*idx + (1:3), k], f.mat[2*idx + (1:3), k])
+      })
+      
+      if (idx == 1) {
+        I.trap.int <- rbind(I.trap.int.1, I.trap.int.2, I.trap.int[-1, ])
+        I.simp.int <- rbind(I.simp.int.1, I.simp.int.2, I.simp.int[-1, ])
+      } else if (idx == N) {
+        I.trap.int <- rbind(I.trap.int[-N, ], I.trap.int.1, I.trap.int.2)
+        I.simp.int <- rbind(I.simp.int[-N, ], I.simp.int.1, I.simp.int.2)
+      } else {
+        I.trap.int <- rbind(I.trap.int[1:(idx - 1), ], I.trap.int.1, I.trap.int.2, I.trap.int[(idx + 1):N, ])
+        I.simp.int <- rbind(I.simp.int[1:(idx - 1), ], I.simp.int.1, I.simp.int.2, I.simp.int[(idx + 1):N, ])
+      }
+      I.trap.cum <- rbind(0, apply(I.trap.int, 2, cumsum)) # room for efficiency
+      I.simp.cum <- rbind(0, apply(I.simp.int, 2, cumsum)) # room for efficiency
+      
+      err.abs.cum <- abs(I.simp.cum - I.trap.cum)
+      err.rel.cum <- err.abs.cum / abs(I.simp.cum)
+      err.abs.int <- abs(I.simp.int - I.trap.int)
+      err.rel.int <- err.abs.int / abs(I.simp.int)
+      
+      err.abs <- err.abs.cum[N + 2, ]
+      err.rel <- err.rel.cum[N + 2, ]
+      err.rel.max <- max(err.rel)
+      
+      N <- N + 1
+    }
+    
+    idx.nodes <- seq(from = 1, to = 2*N + 1, by = 2)
+    I.trap.out <- apply(I.trap.cum, 2, function(x) approx(xvec[idx.nodes], x, tout)$y)
+    I.simp.out <- apply(I.simp.cum, 2, function(x) approx(xvec[idx.nodes], x, tout)$y)
+    
+    for (k in 1:K) {
+      smat[, k] <- f.list[[k]](tout, args.list[[k]], j)
+    }
+    
+    return (list(N = N, I.simp.out = I.simp.out, smat = smat))
+  }
+  stopImplicitCluster()
+
+  for (j in 1:nsmp) {
+    is.maxiter[j] <- 1*(retsink[[j]]$N == Nmax)
+    I_out_value[, , j] <- retsink[[j]]$I.simp.out
+    scube[, , j] <- retsink[[j]]$smat
+  }
+
+  n.maxiter <- sum(is.maxiter)
+
+  if (n.maxiter > 0) warning(paste0(n.maxiter, " of ", nsmp, " integrals did not converge after reaching maximum iterations"))
+  
+  return (list(ci = I_out_value, s = scube, is.maxiter = is.maxiter, n.maxiter = n.maxiter))
 }
-
-plot.summary.cfc.pbasis <- function(x, ...) {
-  popavg <- attr(x, "popavg")
-  ylim <- c(0.0, 1.0)
-  ylab <- if (popavg) "Population Average" else "Probability"
-  plot(x[,"time"], x[,"efp"], type = "l", col = "black"
-       , xlab = "Time", ylab = ylab, ylim = ylim)
-  lines(x[,"time"], x[,"ci1"], col = "red")
-  lines(x[,"time"], x[,"ci2"], col = "green")
-  legend("topright", col = c("black", "red", "green")
-         , legend = c("Event-Free", "CI - Cause 1", "CI - Cause 2")
-         , lty = rep(1,3))
-  return (invisible(NULL))
-}
-
-# print.summary.cfc.pbasis <- function(x, ...) {
-#   if (attr(x, "popavg")) cat("Population averages:\n")
-#   nprint <- 6
-#   print(head(x, nprint))
-#   if (nrow(x) > nprint) cat("(", nrow(x)-nprint, " more rows ...)\n", sep = "")
-#   return (invisible(NULL))
-# }
-
-
-
-
