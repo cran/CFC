@@ -66,7 +66,7 @@ cfc.survreg <- function(formula, data, newdata = NULL, dist = "weibull", control
 }
 
 summary.cfc.survreg <- function(object, obs.idx = "all", ...) {
-  if (obs.idx == "all") obs.idx <- 1:nrow(object$regs[[1]]$x)
+  if (obs.idx[1] == "all") obs.idx <- 1:nrow(object$regs[[1]]$x)
   ci.mean <- apply(X = object$cfc$ci, MARGIN = c(1,2), FUN = mean)
   s.mean <- apply(X = object$cfc$s, MARGIN = c(1,2), FUN = mean)
   

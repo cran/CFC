@@ -1,3 +1,7 @@
+Changes in 1.0.1
+  * Fixed a bug in C++ source file for vignetter, weib.cpp, exposed by Clang-UBSAN
+  * Removed unnecessary warning in summary.cfc.survreg when "all" observations are selected.
+
 Changes in 1.0.0
   * Introducing a new API for CFC, via function "cfc", where instead of pre-generated survival arrays, the fnction expects survival functions and will generate the arrays at time points determined by the quadrature algorithm.
   * A novel quadrature algorithm, named generalized Newton-Cotes, for performing CFC integrals with more stability in cases of end-point singularity.

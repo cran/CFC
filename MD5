@@ -1,16 +1,16 @@
-5e90041303a08de482e60ebb4db7ace1 *ChangeLog
-3540aeb139449b260d57a293208c089b *DESCRIPTION
+ff0f2a8c8f484ccdfc825dceabd4b2c9 *ChangeLog
+ae44830d7770459f8806ed2b4f6297d3 *DESCRIPTION
 0d8fcb2247a6693aa88fa7e7a3c90fea *NAMESPACE
 06ed2cd019236e11b13826fba599a93f *R/RcppExports.R
 e809c902ffc1e3c62b172a175d569bce *R/cfc.R
 8dd052efc7755f6de181050c4c4464aa *R/cfc_legacy.R
-e1480ba60aa1622e43f2aea8d4600d1d *R/cfc_survreg.R
+91ed16832330015d1ca5a5cc47e8b508 *R/cfc_survreg.R
 ff0daadf8bab9c205f188c5abcf73703 *R/zzz.R
 a19c0a8259178edcb9daebecaf750de4 *build/vignette.rds
 4287db3533e463a0c4899b7faad8962b *data/bmt.txt.gz
 0afdc5e4ea4f4bb50a78983c89b546d9 *inst/doc/cfc.R
 4c6cb6571b4f16578c77408423db30b2 *inst/doc/cfc.Rnw
-e7b581211a2d9102f37938f144c06ccb *inst/doc/cfc.pdf
+0edf149313004211575edfcacdf84e4a *inst/doc/cfc.pdf
 3a953a6a93d4ee9949084464ab794c23 *man/bmt.Rd
 32167da3270d57a388fa99eb1d930b11 *man/cfc.Rd
 44c2fce5156c3b716aeb4cd07f227707 *man/cfc.pbasis.Rd
@@ -28,4 +28,4 @@ ba7cfdc2c9bfc751c9fe484dd8164730 *src/cfc.cpp
 4c31c1405eec322b8d54ad42306c0ca7 *vignettes/cblas.h
 4c6cb6571b4f16578c77408423db30b2 *vignettes/cfc.Rnw
 ea3b104322fc7a0fccc660a8c0fbfde4 *vignettes/cfc.bib
-bf627da89664d7f565d22e73ab2414ac *vignettes/weib.cpp
+71830807a48b596749068ce8b487251d *vignettes/weib.cpp

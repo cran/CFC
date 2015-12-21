@@ -35,7 +35,7 @@ vec weib_sfunc(vec t, void *arg, int n) {
 }
 // [[Rcpp::export]]
 XPtr<func> weib_getPtr_func() {
-  XPtr<func> p(new func(&weib_sfunc), true);
+  XPtr<func> p(new func(weib_sfunc), true);
   return p;
 }
 
@@ -51,7 +51,7 @@ void* weib_init(List arg) { // add an optimized version that pre-computes Xbeta
 }
 // [[Rcpp::export]]
 XPtr<initfunc> weib_getPtr_init() {
-  XPtr<initfunc> p(new initfunc(&weib_init), true);
+  XPtr<initfunc> p(new initfunc(weib_init), true);
   return p;
 }
 
@@ -60,6 +60,6 @@ void weib_free(void *arg) {
 }
 // [[Rcpp::export]]
 XPtr<freefunc> weib_getPtr_free() {
-  XPtr<freefunc> p(new freefunc(&weib_free), true);
+  XPtr<freefunc> p(new freefunc(weib_free), true);
   return p;
 }
