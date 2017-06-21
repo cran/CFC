@@ -1,3 +1,8 @@
+Changes in 1.1.0
+  * Added summary method for cfc, and plot method for summary.cfc
+  * Updated vignette (including reduced compile time by loading pre-computed data)
+  * Addressed issues raised in CRAN checks
+
 Changes in 1.0.1
   * Fixed a bug in C++ source file for vignetter, weib.cpp, exposed by Clang-UBSAN
   * Removed unnecessary warning in summary.cfc.survreg when "all" observations are selected.

@@ -6,7 +6,7 @@
 Summarizing and plotting output of \code{cfc.survreg}
 }
 \description{
-\code{summary} method for class \code{\link{cfc.survreg}}.
+\code{summary} and method for class \code{\link{cfc.survreg}}.
 }
 \usage{
 \method{summary}{cfc.survreg}(object, obs.idx = "all", ...)
@@ -18,10 +18,10 @@ Summarizing and plotting output of \code{cfc.survreg}
   \item{obs.idx}{Index of observations to calculate mean cumulative incidence for; defaults to all observation.}
   \item{...}{Further arguments to be passed to/from other methods.}
   \item{x}{An object of class \code{summary.cfc.survreg}, usually the output of \code{summary.cfc.survreg}.}
-  \item{which}{TBD}
+  \item{which}{Vector of integers, indicating which plot(s) must be produced: 1) cumulative incidence functions, one per cause, as a function of time-to-index, all in the same plot, 2) comparison of cumulative incidence function with/without competing-risk adjustment. The unadjusted figure is equivalent to 1 minus the Kaplan-Meyer (i.e., survival) function.}
 }
 \value{
-\code{summary.cfc.surveeg} produces a matrix of dimensions \code{length(object$tout)} (number of time points) by \code{object$K} (number of causes). \code{plot.summary.cfc.survreg} plots the mean cumulative incidence functions on a single plot.
+\code{summary.cfc.surveeg} produces a matrix of dimensions \code{length(object$tout)} (number of time points) by \code{object$K} (number of causes). See description of \code{which} aregument for \code{plot.summary.cfc.survreg}.
 }
 
 \author{Mansour T.A. Sharabiani, Alireza S. Mahani}

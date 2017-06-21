@@ -50,9 +50,10 @@ Mansour T.A. Sharabiani, Alireza S. Mahani
 \examples{
 \dontrun{
 
+library("survival") # used for constructing survival formulas
 library("BSGW") # used for Bayesian survival regression
 
-data(bmt)
+data("bmt")
 # splitting data into training and prediction sets
 idx.train <- sample(1:nrow(bmt), size = 0.7 * nrow(bmt))
 idx.pred <- setdiff(1:nrow(bmt), idx.train)
@@ -96,6 +97,7 @@ f.list <- list(survfunc, survfunc)
 
 # cause-specific competing-risk
 # set rel.tol to smaller number in real-world applications
+tout <- seq(from = 0.0, to = tmax, length.out = 10)
 out.cfc <- cfc(f.list, arg.list, nobs.pred * nsmp, tout, rel.tol = 1e-2)
 
 }

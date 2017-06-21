@@ -22,9 +22,9 @@ cfc.survreg.survprob <- function(t, args, n) { # predicting survival probability
   mydist <- unlist(unname(survreg.distributions[dist.name]))
   if (any(names(mydist) == "dist")) { # derived distribution
     mydist.base <- unlist(unname(survreg.distributions[mydist$dist]))
-    p <- mydist.base$density((mydist$trans(t) - t(args$coefficients) %*% args$x[n, ]) / args$scale)[, 1]
+    p <- mydist.base$density((mydist$trans(t) - t(args$coefficients) %*% c(args$x[n, ])) / args$scale)[, 1]
   } else { # base distribution
-    p <- mydist$density((t - t(args$coefficients) %*% args$x[n, ]) / args$scale)[, 1]
+    p <- mydist$density((t - t(args$coefficients) %*% c(args$x[n, ])) / args$scale)[, 1]
   }
   return (1 - p)
 }

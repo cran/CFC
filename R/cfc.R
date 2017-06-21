@@ -24,17 +24,88 @@ simpson.generalized <- function(f, g = function(x, ...) x, a, b, ...) { # can be
   return (ret)
 }
 
-summary.cfc <- function(object, quantiles = c(0.025, 0.5, 0.975)
-  , dims = c(dim(object$val)[3]), dims.keep = 1) {
-  dat.dims <- dim(object$val)
-  dat.reshaped <- array(object$val, dim = c(dat.dims[1:2], dims))
-  dat.quant <- apply(X = dat.reshaped, MARGIN = c(1, 2, dims.keep + 2), FUN = quantile, probs = quantiles)
-  return (dat.quant)
+plot.summary.cfc <- function(
+  x
+  , which = c(1, 2)
+  , ...
+  ) {
+  tvec <- x$tout
+  ci.q <- x$ci
+  s.q <- x$s
+  quantiles <- x$quantiles
+
+  dimCI <- dim(ci.q)
+  K <- dimCI[length(dimCI)]
+  
+  if (1 %in% which) {
+    # cumulative incidence function
+    for (k in 1:K) {
+      if (quantiles) {
+        ci.ylim <- range(ci.q[, , k])
+        plot(tvec, ci.q[2, , k], type = "l"
+             , xlab = "time from index", ylab = "CI"
+             , ylim = ci.ylim, main = paste0("cause ", k, " - cumulative incidence"))
+        lines(tvec, ci.q[1, , k], lty = 2)
+        lines(tvec, ci.q[3, , k], lty = 2)
+      } else {
+        plot(tvec, ci.q[, k], type = "l"
+             , xlab = "time from index", ylab = "CI"
+             , main = paste0("cause ", k, " - cumulative incidence"))
+      }
+    }
+  }
+  
+  if (2 %in% which) {
+    # survival probability
+    for (k in 1:K) {
+      if (quantiles) {
+        s.ylim <- range(s.q[, , k])
+        plot(tvec, s.q[2, , k], type = "l"
+             , xlab = "time from index", ylab = "survival probability"
+             , ylim = s.ylim, main = paste0("cause ", k, " - survival"))
+        lines(tvec, s.q[1, , k], lty = 2)
+        lines(tvec, s.q[3, , k], lty = 2)
+      } else {
+        plot(tvec, s.q[, k], type = "l"
+             , xlab = "time from index", ylab = "survival probability"
+             , main = paste0("cause ", k, " - survival"))
+      }
+    }
+  }
+}
+
+summary.cfc <- function(
+  object
+  , f.reduce = function(x) x # transformation function applied to values at each time-point and cause
+  , pval = 0.05
+  , ... # other arguments passed to 'f'
+) {
+  # check if f.reduce output is a vector or a scalar
+  # if vector: we treat it as samples and compute quantiles for it
+  # if scalar: just report the single number; no quantile calculation needed
+  isVector <- length(f.reduce(object$ci[1, 1, ], ...)) > 1
+  
+  s <- NA
+  ci <- NA
+  if (isVector) {
+    ci <- apply(object$ci, MARGIN = c(1, 2), FUN = function(x) {
+      quantile(f.reduce(x, ...), probs = c(pval / 2, 0.5, 1 - pval / 2))
+    })
+    s <- apply(object$s, MARGIN = c(1, 2), FUN = function(x) {
+      quantile(f.reduce(x, ...), probs = c(pval / 2, 0.5, 1 - pval / 2))
+    })
+  } else {
+    ci <- apply(object$ci, MARGIN = c(1, 2), FUN = f.reduce, ...)
+    s <- apply(object$s, MARGIN = c(1, 2), FUN = f.reduce, ...)
+  }
+  
+  ret <- list(tout = object$tout, ci = ci, s = s, quantiles = isVector)
+  class(ret) <- c("summary.cfc", class(ret))
+
+  return (ret)
 }
 
 print.summary.cfc <- function(x, ...) {}
-
-plot.summary.cfc <- function(x, ...) {}
 
 cfc <- function(f.list, args.list, n, tout, Nmax = 100L, rel.tol = 1e-5, ncores = 1) {
   if (!is.list(f.list)) stop("f.list must be a list")
@@ -54,6 +125,7 @@ cfc <- function(f.list, args.list, n, tout, Nmax = 100L, rel.tol = 1e-5, ncores 
     ret <- cscr_samples_Cpp(func_list, init_list, free_list, args.list, tout, Nmax, rel.tol, n, ncores)
     ret$is.maxiter <- as.vector(ret$is.maxiter) # TODO: find better way to covert to vector (from matrix) inside Cpp code
   }
+  ret$tout <- tout # we use this in plotting inside summary.cfc
   class(ret) <- c("cfc", class(ret))
   return (ret)
 }
@@ -175,8 +247,8 @@ cscr.samples.R <- function(f.list, args.list, tout, Nmax = 100L, rel.tol = 1e-6,
     }
     
     idx.nodes <- seq(from = 1, to = 2*N + 1, by = 2)
-    I.trap.out <- apply(I.trap.cum, 2, function(x) approx(xvec[idx.nodes], x, tout)$y)
-    I.simp.out <- apply(I.simp.cum, 2, function(x) approx(xvec[idx.nodes], x, tout)$y)
+    I.trap.out <- apply(I.trap.cum, 2, function(x) approx(xvec[idx.nodes], x, tout)$y) # TODO: consider nonlinear interpolations to make the curves look smoother
+    I.simp.out <- apply(I.simp.cum, 2, function(x) approx(xvec[idx.nodes], x, tout)$y) # TODO: see above
     
     for (k in 1:K) {
       smat[, k] <- f.list[[k]](tout, args.list[[k]], j)
