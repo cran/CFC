@@ -22,9 +22,9 @@ cfc.survreg.survprob(t, args, n)
 \value{
 Vector of survival probabilities at time(s) \code{t}.
 }
-%\references{
-%% ~put references to the literature/web site here ~
-%}
+\references{
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+}
 \author{
 Mansour T.A. Sharabiani, Alireza S. Mahani
 }

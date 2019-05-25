@@ -306,17 +306,23 @@ cat("parallelization speedup - C++:", t.Cpp.1000 / t.Cpp.1000.par, "\n")
 ## f.list <- list(cfc.survreg.survprob, rfsrc.survfunc)
 ## arg.list <- list(reg1, reg2)
 ## tout <- seq(0.0, tmax, length.out = 10)
-## cfc.out <- cfc(f.list, arg.list, nrow(bmt), tout, rel.tol = 1e-3)
+## cfc.out <- cfc(f.list, arg.list, nrow(bmt), tout, rel.tol = 1e-4)
 
 
 ###################################################
-### code chunk number 33: cfc.Rnw:677-678 (eval = FALSE)
+### code chunk number 33: cfc.Rnw:621-622 (eval = FALSE)
+###################################################
+## plot(summary(cfc.out, f.reduce = mean))
+
+
+###################################################
+### code chunk number 34: cfc.Rnw:688-689 (eval = FALSE)
 ###################################################
 ## sessionInfo()
 
 
 ###################################################
-### code chunk number 34: cfc.Rnw:680-682
+### code chunk number 35: cfc.Rnw:691-693
 ###################################################
 my.session <- readRDS(file = "session_info.RDS")
 print(my.session)

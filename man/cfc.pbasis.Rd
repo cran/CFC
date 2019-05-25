@@ -27,6 +27,8 @@ For each 'row' of \code{t1}, and \code{t2}, all elements are processed independe
 If \code{t1} and \code{t2} are one-dimensional, a matrix with columns named \code{"time"}, \code{"ci1"}, \code{"ci2"} and \code{"efp"} is returned. For multi-dimensional arrays, a list is returned with one such matrix for each element of the consolidated dimension representing all but the first dimension of \code{t1} and \code{t2}.
 }
 \references{
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+
 Prentice et al (1978). The analysis of failure times in the presence of competing risks. Biometrics, 541-554.
 }
 \author{

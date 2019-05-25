@@ -26,6 +26,8 @@ Assuming one-dimensional \code{p1} and \code{p2} for clarity, the algorithm calc
 If \code{p1} and \code{p2} are one-dimensional arrays (i.e. vectors), a matrix with columns named \code{"ci1"}, \code{"ci2"} and \code{"efp"} is returned, representing the cummulative incidence functions for cause 1 and cause 2 and the event-free probability, evaluated at same time points as \code{p1} and \code{p2} are provided. If \code{p1} and \code{p2} are multi-dimensional arrays, a list is returned with elements \code{"ci1"}, \code{"ci2"} and \code{"efp"}, each one with the same interpretation, and all of the same dimensions as \code{p1} and \code{p2}.
 }
 \references{
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+
 Prentice et al (1978). The analysis of failure times in the presence of competing risks. Biometrics, 541-554.
 }
 \author{

@@ -33,6 +33,8 @@ An object of class \code{cfc}, which is a list with the following elements:
 \references{
 Haller, B., Schmidt, G., & Ulm, K. (2013). Applying competing risks regression models: an overview. Lifetime data analysis, 1-26.
 
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+
 Prentice et al (1978). The analysis of failure times in the presence of competing risks. Biometrics, 541-554.
 }
 \author{

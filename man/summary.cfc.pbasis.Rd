@@ -24,6 +24,10 @@ The function \code{summary.cfc.pbasis} calculates the average of cumulative inci
 
 \author{Alireza S. Mahani, Mansour T.A. Sharabiani}
 
+\references{
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+}
+
 \seealso{
 The model fitting function is \code{\link{cfc.pbasis}}. See \code{\link{summary}} and \code{\link{plot}} for descriptions of the generic methods. See \code{\link{cfc.tbasis}} for time-denominated CFC, as well as usage examples.
 

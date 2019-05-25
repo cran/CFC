@@ -26,12 +26,14 @@ A list with the following elements:
 \item{formula.noresp}{A formula with no left-hand side (time and status variables). This can be used for preparing the model matrix for prediction data sets, which can possibly have no response.}
 \item{tmax}{Maximum time to event/censoring extracted from original data frame. This can be used, e.g., during competing-risk analysis.}
 }
-%\references{
-%% ~put references to the literature/web site here ~
-%}
 \author{
 Mansour T.A. Sharabiani, Alireza S. Mahani
 }
+
+\references{
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+}
+
 %\note{
 %%  ~~further notes~~
 %}

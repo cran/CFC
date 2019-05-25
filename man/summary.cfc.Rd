@@ -27,6 +27,10 @@ Summarizing and plotting output of \code{cfc}
 Recall that the survival probability and cumulative incidence arrays returned by \code{cfc} are three-dimensional, and their first two dimensions indicate 1) time points and 2) causes. \code{f.reduce} is expected to produce an array of a fixed length, when applied to each sub-array, \code{ci[i, j, ]} and \code{s[i, j, ]}. The end-result is two three-dimensional array, where the first two dimensions are identical to its input arrays. This 3D array is then passed to the \code{quantile} function to compute median and credible bands. There is a special case where \code{f.reduce} returns a scalar, rather than an array, when applied to each sub-array. In this case, quantile calculation is meaningless and we return simply these point estimates. In summary, the return object from \code{summary} is a list with elements: 1) \code{ci} (cumulative incidence), 2) \code{s} (survival), and 3) \code{quantiles}, a boolean flag indicating whether the cumulative incidence and survival arrays returned are quantiles or point estimates.
 }
 
+\references{
+Mahani A.S. and Sharabiani M.T.A. (2019). Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC. Journal of Statistical Software, 89(9), 1-29. doi:10.18637/jss.v089.i09
+}
+
 \author{Alireza S. Mahani, Mansour T.A. Sharabiani}
 
 \seealso{

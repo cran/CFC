@@ -1,3 +1,10 @@
+Changes in 1.1.2
+  * Added CITATION file and reference to JSS paper in .Rd files.
+  * Modified Makevars to 1- pass C++ (and not C) version of OpenMP flag to PKG_CXXFLAGS (and not the preprocessor flag PKG_CPPFLAGS), 2- pass matching flag to PKG_LIBS.
+
+Changes in 1.1.1 (**not published to CRAN due to error in Makevars file**)
+  * Edited Makevars file to pass openmp flag to the correct (C/CXX) flags.
+
 Changes in 1.1.0
   * Added summary method for cfc, and plot method for summary.cfc
   * Updated vignette (including reduced compile time by loading pre-computed data)

@@ -1,6 +1,6 @@
-\documentclass[nojss]{jss}
+%\documentclass[nojss]{jss}
 %\documentclass[codesnippet]{jss}
-%\documentclass{jss}
+\documentclass{jss}
 \usepackage[latin1]{inputenc}
 %\pdfoutput=1
 \usepackage{amsmath}
@@ -615,8 +615,19 @@ Finally, we construct the function and argument lists for \code{cfc} and call th
 f.list <- list(cfc.survreg.survprob, rfsrc.survfunc)
 arg.list <- list(reg1, reg2)
 tout <- seq(0.0, tmax, length.out = 10)
-cfc.out <- cfc(f.list, arg.list, nrow(bmt), tout, rel.tol = 1e-3)
+cfc.out <- cfc(f.list, arg.list, nrow(bmt), tout, rel.tol = 1e-4)
 @
+This \code{cfc} object can be summarized as before, but this time we will simply average across all observations, i.e., there will be no samples remaining since the framework was not Bayesian. See Figure~\ref{fig-summary-cfc-nonpar}. Note that, in this case, our reduction function isn't producing samples but point estimates, and therefore quantile calculation is meaningless.
+<<eval=FALSE>>=
+plot(summary(cfc.out, f.reduce = mean))
+@
+\begin{figure}
+\centering
+\includegraphics[]{fig5.pdf}
+\caption{Population-average, cause-specific cumulative incidence and survival functions corresponding to example 4.}
+\label{fig-summary-cfc-nonpar}
+\end{figure}
+
 
 \section{Discussion}\label{section-discussion}
 \textbf{Summary:} Bayesian techniques offer many, well-recognized methodological advantages -- particularly in survival analysis -- including a general estimation framework, consistent treatment and propagation of uncertainty, validity for small (and large) samples, ability to incorporate prior information, ease of model comparison and validation, and natural handling of missing data~\citep{ibrahim2005bayesian}. Translating this broad appeal into widespread \textit{adoption} of Bayesian techniques is critically dependent on the availability of software for their easy and efficient estimation and prediction. Most effort in developing high-performance Bayesian software, however, has been focused on the estimation side, with research covering areas such as efficient~\citep{girolami2011riemann,mahani2015sns}, self-tuning~\citep{homan2014no}, and parallel~\citep{mahani2015simd,gonzalez2011parallel} MCMC sampling, among others. In contrast, relatively little attention has been paid to providing techniques and tools for full Bayesian \textit{prediction}, leaving many practitioners with no choice but to use premature, point summaries of model parameters to produce approximate, mean values for predicted entities. (See, however, \cite{mahani2017mfu}.)
