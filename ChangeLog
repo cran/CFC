@@ -1,3 +1,7 @@
+Changes in 1.2.0
+  * Removed vignette, and instead added a link to the corresponding JSS paper in the DESCRIPTION file.
+  * Removed 'Suggests' field after removal of vignette.
+
 Changes in 1.1.2
   * Added CITATION file and reference to JSS paper in .Rd files.
   * Modified Makevars to 1- pass C++ (and not C) version of OpenMP flag to PKG_CXXFLAGS (and not the preprocessor flag PKG_CPPFLAGS), 2- pass matching flag to PKG_LIBS.
